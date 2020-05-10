@@ -1,1 +1,1 @@
-# Czech_bank_AML_analysis
+# Czech_bank_AML_analysis [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/abhmalik/Czech_bank_AML_analysis/master?filepath=https%3A%2F%2Fgithub.com%2Fabhmalik%2FCzech_bank_AML_analysis%2Fblob%2Fmaster%2FDemo_file.ipynb)
