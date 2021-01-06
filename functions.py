@@ -2,6 +2,20 @@ import pandas as pd
 
 
 def trx_select(selected_fp, i):
+	"""
+	Maps feature values with their respective textual explanations for negative SHAP values
+
+    Parameters:
+    argument1 (selected_fp): Feature values of selected false positive cased
+    argument1 (i): index of the transaction of interest
+
+    Returns:
+    top_shap: Most influencial SHAP values for the model decison
+    exp_dict: Dictionary for textual explanations
+    anomaly: Anomaly flag
+    shaps_pd['LGBM Shap']: Shap Values
+	"""
+
     
     tr_feat = suspicious_cases_feat.iloc[i]    
     tr_full = selected_fp.iloc[i].apply(lambda x: round(x, 3) if isinstance(x, float) else x)
@@ -27,15 +41,18 @@ def trx_select(selected_fp, i):
     return top_shap, exp_dict, anomaly, shaps_pd['LGBM Shap']
 
 def show_trx_data(selected_fp, i):
+	'''Displaying transaction data for the concerned transaction'''
     print(selected_fp.iloc[i, 1:])
-    
-#     print(dd[useful_feats]/(1-dd[useful_feats]))
-    
+        
 def show_account_hist(selected_fp, i):
+	'''Displaying account history for the concerned transaction'''
+
     account = selected_fp.iloc[i].account_id
     display(df.loc[df.account_id==account])
     
 def plot_shap_values(dd, i):
+	'''Generating SHAP value plot for the concerned transaction'''
+
     plt.figure(figsize=(15,10))
     dd = dd.sort_values(ascending=False)
     dd[:10].sort_values(ascending=True).plot(kind='barh')
@@ -43,6 +60,7 @@ def plot_shap_values(dd, i):
     show_inline_matplotlib_plots()
     
 def plot_selected(i):
+	'''Plotting trx for selected trx'''
         clear_output()
 
         selected_fp = suspicious_cases
@@ -68,11 +86,13 @@ def plot_selected(i):
             plot_shap_values(shaps_pd, i)
             
 def next_button_clicked(b):
+	'''change of global index when next button is toggles'''
     with out:
         global ix
         ix += 1
 
 def prev_button_clicked(b):
+	'''change of global index when prev button is toggles'''
     with out:
         global ix
         ix -= 1
@@ -85,6 +105,15 @@ def refresh_button_clicked(b):
         
 
 def negative(tr_full, mode):
+	"""Maps feature values with their respective textual explanations for negative SHAP values
+
+	    Parameters:
+	    argument1 (tr_full): Transaction feature values
+	    argument1 (mode): Mode of transaction
+
+	    Returns:
+	    Dict with textual explanations
+	"""
 
     neg_dict = {}
     neg_dict['latent_dim1'] = f"Looking at the amount and mode of transactions of this account in the last 4 month, deep learning model asses the combination of {tr_full.amount} CZK and mode of transaction '{mode}' to be normal."
@@ -157,6 +186,15 @@ def negative(tr_full, mode):
 
 
 def positive(tr_full, mode):
+	"""Maps feature values with their respective textual explanations for positive SHAP values
+
+	    Parameters:
+	    argument1 (tr_full): Transaction feature values
+	    argument1 (mode): Mode of transaction
+
+	    Returns:
+	    Dict with textual explanations
+	"""
 
     pos_dict = {}
     pos_dict['latent_dim1'] = f"Looking at the amount and mode of transactions of this account in the last 4 month, deep learning model asses the combination of {tr_full.amount} CZK and mode of transaction '{mode}' to be unusual."
