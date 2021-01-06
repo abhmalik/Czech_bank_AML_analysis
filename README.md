@@ -1,6 +1,6 @@
-# Explainable AML Analysis: Czech Bank [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/abhmalik/Czech_bank_AML_analysis/master)
+# Explainable AML Analysis Demo using Czech Bank data [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/abhmalik/Czech_bank_AML_analysis/master)
 
-This tool is to help people in examine fraudalent cases predicted by our method. This tool is designed to let anyone explore the cases in an interactive way without any knowledge of the underlying machine learning, deep leanring models and the feature calculation techniques.
+This tool is to help people examine fraudalent cases predicted by our method. This tool is designed to let anyone explore the cases in an interactive way without any knowledge of the underlying machine learning, deep leanring models and the feature calculation techniques.
 
 ## How to run the tool:
 1. [open binder](https://mybinder.org/v2/gh/abhmalik/Exoplanet-Vetting-Tool/master) and run `Demo_file.ipynb`
