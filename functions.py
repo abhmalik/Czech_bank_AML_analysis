@@ -1,5 +1,89 @@
 import pandas as pd
 
+
+def trx_select(selected_fp, i):
+    
+    tr_feat = suspicious_cases_feat.iloc[i]    
+    tr_full = selected_fp.iloc[i].apply(lambda x: round(x, 3) if isinstance(x, float) else x)
+    
+    shap_contrib = clf.predict(tr_feat, pred_contrib=True)
+
+    featsxg = {} # a dict to hold feature_name
+    for feature, shap_temp in zip(tr_feat.index, shap_contrib[0][:-1]):
+        featsxg[feature] = shap_temp #add the name/value pair
+
+    shaps_pd = pd.DataFrame.from_dict(featsxg, orient='index').rename(columns={0: 'LGBM Shap'})
+    mode = 'cash' if tr_full.isCash == 1 else 'bank transfer'
+    
+    anomaly = 0
+    if clf.predict(tr_feat) > 0.5: 
+        top_shap = shaps_pd.sort_values(by='LGBM Shap', ascending=False)[0:5]
+        exp_dict = positive(tr_full, mode)
+        anomaly = 1
+    else: 
+        top_shap = shaps_pd.sort_values(by='LGBM Shap', ascending=True)[0:5]
+        exp_dict = negative(tr_full, mode)
+        
+    return top_shap, exp_dict, anomaly, shaps_pd['LGBM Shap']
+
+def show_trx_data(selected_fp, i):
+    print(selected_fp.iloc[i, 1:])
+    
+#     print(dd[useful_feats]/(1-dd[useful_feats]))
+    
+def show_account_hist(selected_fp, i):
+    account = selected_fp.iloc[i].account_id
+    display(df.loc[df.account_id==account])
+    
+def plot_shap_values(dd, i):
+    plt.figure(figsize=(15,10))
+    dd = dd.sort_values(ascending=False)
+    dd[:10].sort_values(ascending=True).plot(kind='barh')
+    plt.title(f'Index: {i}', fontsize=16)
+    show_inline_matplotlib_plots()
+    
+def plot_selected(i):
+        clear_output()
+
+        selected_fp = suspicious_cases
+        top_shap, exp_dict, anomaly, shaps_pd = trx_select(selected_fp, i)
+
+        if dropdown.value == 'Transaction data':
+            printmd(f'### Transaction data for index: {i}')
+            show_trx_data(selected_fp, i)         
+#             printmd(f'### Important behavioural features data for index: {i}')
+#             show_useful_feats(selected_fp, i)
+        if dropdown.value == 'Account history':
+            printmd(f'### Account history for this card: {i}')
+            show_account_hist(selected_fp, i)
+        if dropdown.value == 'Decision Explanations':
+            if anomaly>0: 
+                printmd(f'### The transaction (index {i}) is anomalous due to the factors shown below:')
+            else:
+                printmd(f'### The transaction (index {i}) is non-anomalous due to the factors shown below:')
+            for x in top_shap.index:
+                printmd('- '+exp_dict[x])
+        if dropdown.value == 'Shap Analysis':
+            printmd(f'### Shap Analysis for the index: {i}')
+            plot_shap_values(shaps_pd, i)
+            
+def next_button_clicked(b):
+    with out:
+        global ix
+        ix += 1
+
+def prev_button_clicked(b):
+    with out:
+        global ix
+        ix -= 1
+        if ix<0: ix=0
+        
+def refresh_button_clicked(b):
+    with out:
+        global ix
+        plot_selected(ix)
+        
+
 def negative(tr_full, mode):
 
     neg_dict = {}
@@ -142,87 +226,3 @@ def positive(tr_full, mode):
     pos_dict['month_of_year'] = f'Its unusual to have this transaction in {tr_full.date.month}th month.'
     
     return pos_dict
-
-
-
-def trx_select(selected_fp, i):
-    
-    tr_feat = suspicious_cases_feat.iloc[i]    
-    tr_full = selected_fp.iloc[i].apply(lambda x: round(x, 3) if isinstance(x, float) else x)
-    
-    shap_contrib = clf.predict(tr_feat, pred_contrib=True)
-
-    featsxg = {} # a dict to hold feature_name
-    for feature, shap_temp in zip(tr_feat.index, shap_contrib[0][:-1]):
-        featsxg[feature] = shap_temp #add the name/value pair
-
-    shaps_pd = pd.DataFrame.from_dict(featsxg, orient='index').rename(columns={0: 'LGBM Shap'})
-    mode = 'cash' if tr_full.isCash == 1 else 'bank transfer'
-    
-    anomaly = 0
-    if clf.predict(tr_feat) > 0.5: 
-        top_shap = shaps_pd.sort_values(by='LGBM Shap', ascending=False)[0:5]
-        exp_dict = positive(tr_full, mode)
-        anomaly = 1
-    else: 
-        top_shap = shaps_pd.sort_values(by='LGBM Shap', ascending=True)[0:5]
-        exp_dict = negative(tr_full, mode)
-        
-    return top_shap, exp_dict, anomaly, shaps_pd['LGBM Shap']
-
-def show_trx_data(selected_fp, i):
-    print(selected_fp.iloc[i, 1:])
-    
-#     print(dd[useful_feats]/(1-dd[useful_feats]))
-    
-def show_account_hist(selected_fp, i):
-    account = selected_fp.iloc[i].account_id
-    display(df.loc[df.account_id==account])
-    
-def plot_shap_values(dd, i):
-    plt.figure(figsize=(15,10))
-    dd = dd.sort_values(ascending=False)
-    dd[:10].sort_values(ascending=True).plot(kind='barh')
-    plt.title(f'Index: {i}', fontsize=16)
-    show_inline_matplotlib_plots()
-    
-def plot_selected(i):
-        clear_output()
-
-        selected_fp = suspicious_cases
-        top_shap, exp_dict, anomaly, shaps_pd = trx_select(selected_fp, i)
-
-        if dropdown.value == 'Transaction data':
-            printmd(f'### Transaction data for index: {i}')
-            show_trx_data(selected_fp, i)         
-#             printmd(f'### Important behavioural features data for index: {i}')
-#             show_useful_feats(selected_fp, i)
-        if dropdown.value == 'Account history':
-            printmd(f'### Account history for this card: {i}')
-            show_account_hist(selected_fp, i)
-        if dropdown.value == 'Decision Explanations':
-            if anomaly>0: 
-                printmd(f'### The transaction (index {i}) is anomalous due to the factors shown below:')
-            else:
-                printmd(f'### The transaction (index {i}) is non-anomalous due to the factors shown below:')
-            for x in top_shap.index:
-                printmd('- '+exp_dict[x])
-        if dropdown.value == 'Shap Analysis':
-            printmd(f'### Shap Analysis for the index: {i}')
-            plot_shap_values(shaps_pd, i)
-            
-def next_button_clicked(b):
-    with out:
-        global ix
-        ix += 1
-
-def prev_button_clicked(b):
-    with out:
-        global ix
-        ix -= 1
-        if ix<0: ix=0
-        
-def refresh_button_clicked(b):
-    with out:
-        global ix
-        plot_selected(ix)
